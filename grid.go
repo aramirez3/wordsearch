@@ -65,7 +65,6 @@ func handlerNew(w http.ResponseWriter, r *http.Request) {
 }
 
 func addWord(w http.ResponseWriter, r *http.Request) {
-	returnPage(w, "new")
 }
 
 func addWordApi(w http.ResponseWriter, r *http.Request) {
