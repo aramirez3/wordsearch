@@ -6,6 +6,16 @@ import (
 	"net/http"
 )
 
+func respondWithErorr(w http.ResponseWriter, code int, msg string) {
+	type errorResponse struct {
+		Error string
+	}
+	payload := &errorResponse{
+		Error: msg,
+	}
+	respondWithJSON(w, code, payload)
+}
+
 func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	responseData, err := json.Marshal(payload)

@@ -12,6 +12,7 @@ type APIServer struct {
 }
 
 type APIConfig struct {
+	grid Grid
 }
 
 func NewAPIServer(addr string) *APIServer {
@@ -27,6 +28,7 @@ func (s *APIServer) Start() error {
 
 	v1 := http.NewServeMux()
 	v1.Handle("/api/v1/", http.StripPrefix("/api/v1", router))
+	v1.HandleFunc("/api/v1/", s.apiConfig.handlerAddWord)
 
 	middlewareChain := MiddlewareChain(
 		RequestLoggerMiddleware,
