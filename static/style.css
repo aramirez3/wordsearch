@@ -8,9 +8,23 @@
         color: light-dark(#111, #fff);
         font-family: 'Segoe UI', 'Helevetica Neue', sans-serif;
     }
-    main {
+    #root {
+        display: grid;
         width: 960px;
         margin: 0 auto;
-        padding: 2em 4em;
+        grid-template-areas:
+            "header header"
+            "main sidebar";
+        grid-template-columns: 4fr 1fr;
+    }
+    header {
+        grid-area: header;
+        padding: 1em 0;
+    }
+    main {
+        grid-area: main;
+    }
+    aside {
+        grid-area: sidebar;
     }
 }
