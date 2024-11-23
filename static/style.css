@@ -1,0 +1,16 @@
+@media (prefers-color-scheme: dark) {
+    :root {
+        color-scheme: dark light;
+    }
+
+    body {
+        background-color: light-dark(#fff, #111);
+        color: light-dark(#111, #fff);
+        font-family: 'Segoe UI', 'Helevetica Neue', sans-serif;
+    }
+    main {
+        width: 960px;
+        margin: 0 auto;
+        padding: 2em 4em;
+    }
+}
