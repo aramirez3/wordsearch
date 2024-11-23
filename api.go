@@ -26,6 +26,7 @@ func (s *APIServer) Start() error {
 	router := http.NewServeMux()
 
 	router.Handle("/", http.FileServer(http.Dir("static")))
+	router.HandleFunc("/new", handlerNewWordForm)
 
 	v1 := http.NewServeMux()
 	v1.HandleFunc("GET /grids/{id}", s.apiConfig.getGrid)

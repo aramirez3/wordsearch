@@ -1,19 +1,13 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 )
 
 type Grid struct {
 	Matrix [][]string      `json:"matrix"`
 	Words  map[string]bool `json:"words"`
-}
-
-type WordRequest struct {
-	Word string `json:"word"`
 }
 
 func (cfg APIConfig) getGrid(w http.ResponseWriter, r *http.Request) {
@@ -32,26 +26,4 @@ func createMatrix(g *Grid, x int, y int) {
 			g.Matrix[i][j] = "Z"
 		}
 	}
-}
-
-func (cfg APIConfig) handlerAddWord(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("ADD WORD HANDLER")
-	var body WordRequest
-	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&body); err != nil {
-		log.Printf("error decoding json: %s\n", err)
-		respondWithErorr(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
-	}
-	if body.Word == "" {
-		log.Println("empty payload submitted")
-		respondWithErorr(w, http.StatusBadRequest, "blank")
-	}
-
-	if _, ok := cfg.grid.Words[body.Word]; !ok {
-		log.Println("duplicate word submitted")
-		respondWithErorr(w, http.StatusBadRequest, "duplicate")
-	}
-	log.Printf("Saving word: %s\n", body.Word)
-	cfg.grid.Words[body.Word] = true
-	respondWithJSON(w, http.StatusAccepted, cfg.grid.Words)
 }
