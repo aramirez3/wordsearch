@@ -31,8 +31,9 @@ func (s *APIServer) Start() error {
 	v1 := http.NewServeMux()
 	v1.HandleFunc("GET /grids/{id}", s.apiConfig.getGrid)
 	v1.HandleFunc("POST /words", s.apiConfig.handlerAddWord)
+	v1.HandleFunc("DEL /words", s.apiConfig.handlerRemoveWord)
 
-	router.Handle("/api/v1/", http.StripPrefix("/api/v1", RequireAuthMiddleware(v1)))
+	router.Handle("/api/v1/", http.StripPrefix("/api/v1", v1))
 
 	middlewareChain := MiddlewareChain(
 		RequestLoggerMiddleware,

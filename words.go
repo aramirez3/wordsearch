@@ -17,8 +17,9 @@ func handlerNewWordForm(w http.ResponseWriter, r *http.Request) {
 	template := `<div>
 	<input type="text" name="word" </>
 	<button
-		hx-post="words"
+		hx-post="api/v1/words"
 		hx-trigger="click"
+		hx-ext="json-enc"
 		>Add word</button>
 </div>
 `
@@ -27,22 +28,36 @@ func handlerNewWordForm(w http.ResponseWriter, r *http.Request) {
 
 func (cfg APIConfig) handlerAddWord(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("ADD WORD HANDLER")
-	word, err := cfg.validateWordRequest(w, r.Body)
+	word, err := cfg.validateWordRequest(r.Body)
 	if err != nil {
 		respondWithErorr(w, http.StatusBadRequest, err.Error())
+		return
 	}
 	log.Printf("Saving word: %s\n", word)
 	cfg.grid.Words[word] = true
 	respondWithJSON(w, http.StatusAccepted, cfg.grid.Words)
 }
 
-func (cfg *APIConfig) validateWordRequest(w http.ResponseWriter, payload io.ReadCloser) (string, error) {
+func (cfg APIConfig) handlerRemoveWord(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("REMOVE WORD HANDLER")
+	word, err := cfg.validateWordRequest(r.Body)
+	if err != nil {
+		respondWithErorr(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	log.Printf("Removing word: %s\n", word)
+	delete(cfg.grid.Words, word)
+	respondWithJSON(w, http.StatusAccepted, cfg.grid.Words)
+}
+
+func (cfg *APIConfig) validateWordRequest(payload io.ReadCloser) (string, error) {
 	var body WordRequest
 	decoder := json.NewDecoder(payload)
 	if err := decoder.Decode(&body); err != nil {
 		log.Printf("error decoding json: %s\n", err)
-		respondWithErorr(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+		return "", fmt.Errorf("bad request")
 	}
+	fmt.Printf("Decoded payload: %v\n", body)
 	if body.Word == "" {
 		log.Println("empty payload submitted")
 		return "", fmt.Errorf("blank")
