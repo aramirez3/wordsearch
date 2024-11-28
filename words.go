@@ -51,6 +51,7 @@ func (cfg APIConfig) handlerRemoveWord(w http.ResponseWriter, r *http.Request) {
 }
 
 func (cfg *APIConfig) validateWordRequest(payload io.ReadCloser) (string, error) {
+	fmt.Println("VALIDATE PAYLOAD")
 	var body WordRequest
 	decoder := json.NewDecoder(payload)
 	if err := decoder.Decode(&body); err != nil {
