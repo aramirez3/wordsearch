@@ -37,6 +37,7 @@ func (s *APIServer) Start() error {
 
 	middlewareChain := MiddlewareChain(
 		RequestLoggerMiddleware,
+		ValidateRequestMiddleware,
 		// RequireAuthMiddleware,
 	)
 

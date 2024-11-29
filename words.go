@@ -54,6 +54,7 @@ func (cfg *APIConfig) validateWordRequest(payload io.ReadCloser) (string, error)
 	fmt.Println("VALIDATE PAYLOAD")
 	var body WordRequest
 	decoder := json.NewDecoder(payload)
+	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(&body); err != nil {
 		log.Printf("error decoding json: %s\n", err)
 		return "", fmt.Errorf("bad request")
@@ -64,9 +65,10 @@ func (cfg *APIConfig) validateWordRequest(payload io.ReadCloser) (string, error)
 		return "", fmt.Errorf("blank")
 	}
 
-	if _, ok := cfg.grid.Words[body.Word]; !ok {
+	if _, ok := cfg.grid.Words[body.Word]; ok {
 		log.Println("duplicate word submitted")
 		return "", fmt.Errorf("duplicate")
 	}
+	fmt.Printf("payload is validated - %v\n", body)
 	return body.Word, nil
 }

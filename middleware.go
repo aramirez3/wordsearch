@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 )
@@ -29,6 +30,22 @@ func RequireAuthMiddleware(next http.Handler) http.HandlerFunc {
 		token := r.Header.Get("Authorization")
 		if token != "Bearer token" {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+		next.ServeHTTP(w, r)
+	}
+}
+
+func ValidateRequestMiddleware(next http.Handler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "" || r.Method == "GET" {
+			next.ServeHTTP(w, r)
+			return
+		}
+		contentType := r.Header.Get("Content-type")
+		fmt.Printf("content-type value: %s\n", contentType)
+		if contentType != "application/json" {
+			respondWithErorr(w, http.StatusBadRequest, http.StatusText(http.StatusBadRequest))
 			return
 		}
 		next.ServeHTTP(w, r)
