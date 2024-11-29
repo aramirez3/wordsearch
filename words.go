@@ -3,17 +3,17 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
+	"regexp"
 )
-
-type WordRequest struct {
-	Word string `json:"word"`
-}
 
 type WordsList struct {
 	Words map[string]bool `json:"words"`
+}
+
+type WordRequest struct {
+	Word string `json:"word"`
 }
 
 func handlerNewWordForm(w http.ResponseWriter, r *http.Request) {
@@ -30,52 +30,59 @@ func handlerNewWordForm(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(template))
 }
 
-func (cfg APIConfig) handlerAddWord(w http.ResponseWriter, r *http.Request) {
+func (cfg *APIConfig) handlerAddWord(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("ADD WORD HANDLER")
-	word, err := cfg.validateWordRequest(r.Body)
+	payload := WordRequest{}
+	err := cfg.validateWordRequest(r, &payload)
 	if err != nil {
 		respondWithErorr(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	if _, ok := cfg.grid.Words[word]; ok {
+	if _, ok := cfg.grid.Words[payload.Word]; ok {
 		respondWithErorr(w, http.StatusBadRequest, "duplicate")
 		return
 	}
 
-	log.Printf("Saving word: %s\n", word)
-	cfg.grid.Words[word] = true
+	if len(payload.Word) > cfg.grid.longestWord {
+		cfg.grid.longestWord = len(payload.Word)
+	}
+	cfg.grid.Words[payload.Word] = true
 	respondWithJSON(w, http.StatusAccepted, cfg.grid.Words)
 }
 
 func (cfg APIConfig) handlerRemoveWord(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("REMOVE WORD HANDLER")
-	word, err := cfg.validateWordRequest(r.Body)
+	payload := WordRequest{}
+	err := cfg.validateWordRequest(r, &payload)
 	if err != nil {
 		respondWithErorr(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	log.Printf("Removing word: %s\n", word)
-	delete(cfg.grid.Words, word)
+	delete(cfg.grid.Words, payload.Word)
 	respondWithJSON(w, http.StatusAccepted, cfg.grid.Words)
 }
 
-func (cfg *APIConfig) validateWordRequest(payload io.ReadCloser) (string, error) {
-	fmt.Println("VALIDATE PAYLOAD")
-	var body WordRequest
-	decoder := json.NewDecoder(payload)
+func (cfg *APIConfig) validateWordRequest(r *http.Request, payload *WordRequest) error {
+	fmt.Println("VALIDATE WORDS PAYLOAD")
+	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
-	if err := decoder.Decode(&body); err != nil {
+	if err := decoder.Decode(&payload); err != nil {
 		log.Printf("error decoding json: %s\n", err)
-		return "", fmt.Errorf("bad request")
-	}
-	fmt.Printf("Decoded payload: %v\n", body)
-	if body.Word == "" {
-		log.Println("empty payload submitted")
-		return "", fmt.Errorf("blank")
+		return fmt.Errorf("bad request")
 	}
 
-	fmt.Printf("payload is validated - %v\n", body)
-	return body.Word, nil
+	if payload.Word == "" {
+		log.Println("invalid empty payload")
+		return fmt.Errorf("bad request")
+	}
+
+	alphaRegEx := regexp.MustCompile("^[a-zA-Z]+$")
+	if !alphaRegEx.MatchString(payload.Word) {
+		log.Println("only alpha chars are allowed")
+		return fmt.Errorf("bad request")
+	}
+
+	return nil
 }

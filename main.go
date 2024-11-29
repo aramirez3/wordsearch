@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"log"
 	"os"
 
@@ -19,7 +20,14 @@ func main() {
 		port = "8080"
 	}
 
-	server := NewAPIServer(port)
+	dbUrl := os.Getenv("DATABASE_URL")
+	db, err := sql.Open("postgres", dbUrl)
+	if err != nil {
+		log.Fatal("Could not open db")
+		return
+	}
+
+	server := NewAPIServer(port, db)
 
 	server.Start()
 }

@@ -35,7 +35,7 @@ func RequireAuthMiddleware(next http.Handler) http.HandlerFunc {
 	}
 }
 
-func ValidateRequestMiddleware(next http.Handler) http.HandlerFunc {
+func ValidateRequestMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "" || r.Method == "GET" {
 			next.ServeHTTP(w, r)
