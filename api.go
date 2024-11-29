@@ -17,8 +17,13 @@ type APIConfig struct {
 
 func NewAPIServer(addr string) *APIServer {
 	return &APIServer{
-		addr:      ":" + addr,
-		apiConfig: APIConfig{},
+		addr: ":" + addr,
+		apiConfig: APIConfig{
+			grid: Grid{
+				Matrix: [][]string{},
+				Words:  map[string]bool{},
+			},
+		},
 	}
 }
 
@@ -31,7 +36,7 @@ func (s *APIServer) Start() error {
 	v1 := http.NewServeMux()
 	v1.HandleFunc("GET /grids/{id}", s.apiConfig.getGrid)
 	v1.HandleFunc("POST /words", s.apiConfig.handlerAddWord)
-	v1.HandleFunc("DEL /words", s.apiConfig.handlerRemoveWord)
+	v1.HandleFunc("DELETE /words", s.apiConfig.handlerRemoveWord)
 
 	router.Handle("/api/v1/", http.StripPrefix("/api/v1", v1))
 

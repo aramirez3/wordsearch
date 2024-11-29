@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 )
@@ -43,7 +42,6 @@ func ValidateRequestMiddleware(next http.Handler) http.HandlerFunc {
 			return
 		}
 		contentType := r.Header.Get("Content-type")
-		fmt.Printf("content-type value: %s\n", contentType)
 		if contentType != "application/json" {
 			respondWithErorr(w, http.StatusBadRequest, http.StatusText(http.StatusBadRequest))
 			return
