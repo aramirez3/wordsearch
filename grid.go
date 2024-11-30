@@ -22,11 +22,23 @@ type WordsListRequest struct {
 	Words []string `json:"words"`
 }
 
-func (cfg APIConfig) getGrid(w http.ResponseWriter, r *http.Request) {
+func (cfg *APIConfig) getGrid(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("GET GRID HANDLER")
 	g := Grid{}
 	createMatrix(&g, 10, 10)
 	respondWithJSON(w, http.StatusAccepted, g.Matrix)
+}
+
+func (cfg *APIConfig) getGrids(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("GET GRIDS")
+	dbGrids, err := cfg.dbQueries.GetAllGrids(r.Context())
+	if err != nil {
+		fmt.Printf("error getting grids from db: %v\n", err)
+		respondWithErorr(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+		return
+	}
+	fmt.Printf("db results: %v\n", dbGrids)
+	respondWithJSON(w, http.StatusAccepted, dbGrids)
 }
 
 func (cfg *APIConfig) createGrid(w http.ResponseWriter, r *http.Request) {
@@ -55,6 +67,7 @@ func (cfg *APIConfig) createGrid(w http.ResponseWriter, r *http.Request) {
 		ID:        uuid.New(),
 		CreatedAt: time.Now().UTC(),
 		UpdatedAt: time.Now().UTC(),
+		Title:     "test title",
 		Grid:      string(data),
 	}
 	grid, err := cfg.dbQueries.CreateGrid(r.Context(), params)

@@ -14,15 +14,16 @@ import (
 
 const createGrid = `-- name: CreateGrid :one
 INSERT INTO grids
-    (id, created_at, updated_at, grid)
-    values($1, $2, $3, $4)
-RETURNING id, created_at, updated_at, grid
+    (id, created_at, updated_at, title, grid)
+    values($1, $2, $3, $4, $5)
+RETURNING id, created_at, updated_at, title, grid
 `
 
 type CreateGridParams struct {
 	ID        uuid.UUID
 	CreatedAt time.Time
 	UpdatedAt time.Time
+	Title     string
 	Grid      string
 }
 
@@ -31,6 +32,7 @@ func (q *Queries) CreateGrid(ctx context.Context, arg CreateGridParams) (Grid, e
 		arg.ID,
 		arg.CreatedAt,
 		arg.UpdatedAt,
+		arg.Title,
 		arg.Grid,
 	)
 	var i Grid
@@ -38,6 +40,7 @@ func (q *Queries) CreateGrid(ctx context.Context, arg CreateGridParams) (Grid, e
 		&i.ID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Title,
 		&i.Grid,
 	)
 	return i, err
@@ -61,8 +64,41 @@ func (q *Queries) DeleteGridById(ctx context.Context, id uuid.UUID) error {
 	return err
 }
 
+const getAllGrids = `-- name: GetAllGrids :many
+SELECT id, created_at, updated_at, title, grid FROM grids
+`
+
+func (q *Queries) GetAllGrids(ctx context.Context) ([]Grid, error) {
+	rows, err := q.db.QueryContext(ctx, getAllGrids)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Grid
+	for rows.Next() {
+		var i Grid
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Title,
+			&i.Grid,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getGridById = `-- name: GetGridById :one
-SELECT id, created_at, updated_at, grid FROM grids WHERE id=$1
+SELECT id, created_at, updated_at, title, grid FROM grids WHERE id=$1
 `
 
 func (q *Queries) GetGridById(ctx context.Context, id uuid.UUID) (Grid, error) {
@@ -72,6 +108,7 @@ func (q *Queries) GetGridById(ctx context.Context, id uuid.UUID) (Grid, error) {
 		&i.ID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Title,
 		&i.Grid,
 	)
 	return i, err

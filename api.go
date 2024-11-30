@@ -44,6 +44,7 @@ func (s *APIServer) Start() error {
 	v1.HandleFunc("DELETE /words", ValidateRequestMiddleware(s.apiConfig.handlerRemoveWord))
 	v1.HandleFunc("GET /grids/{id}", s.apiConfig.getGrid)
 	v1.HandleFunc("POST /grids", s.apiConfig.createGrid)
+	v1.HandleFunc("GET /grids", s.apiConfig.getGrids)
 
 	router.Handle("/api/v1/", http.StripPrefix("/api/v1", v1))
 

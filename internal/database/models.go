@@ -14,5 +14,6 @@ type Grid struct {
 	ID        uuid.UUID
 	CreatedAt time.Time
 	UpdatedAt time.Time
+	Title     string
 	Grid      string
 }

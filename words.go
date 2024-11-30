@@ -18,14 +18,13 @@ type WordRequest struct {
 
 func handlerNewWordForm(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("NEW WORD FORM")
-	template := `<div>
-	<input type="text" name="word" </>
-	<button
+	template := `<form
 		hx-post="api/v1/words"
 		hx-trigger="click"
-		hx-ext="json-enc"
-		>Add word</button>
-</div>
+		hx-ext="json-enc">
+	<input type="text" name="word" </>
+	<button type="submit">Add word</button>
+</form>
 `
 	w.Write([]byte(template))
 }
@@ -51,7 +50,7 @@ func (cfg *APIConfig) handlerAddWord(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusAccepted, cfg.grid.Words)
 }
 
-func (cfg APIConfig) handlerRemoveWord(w http.ResponseWriter, r *http.Request) {
+func (cfg *APIConfig) handlerRemoveWord(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("REMOVE WORD HANDLER")
 	payload := WordRequest{}
 	err := cfg.validateWordRequest(r, &payload)

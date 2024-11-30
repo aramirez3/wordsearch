@@ -4,10 +4,10 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Wordsearch btw</title>
-        <link rel="stylesheet" href="style.css">
         <script src="htmx.min.js"></script>
         <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/json-enc.js"></script>
         <script src="app.js"></script>
+        <link rel="stylesheet" href="style.css">
     </head>
     <body>
         <div id="root">
@@ -15,24 +15,27 @@
                 <h1>Wordsearch btw</h1>
             </header>
             <main>
-                <div id="new">
+                <div id="word-form">
                     <p>
                         <a
                             hx-get="/new"
                             hx-trigger="click"
-                            hx-target="#new"
-                            hx-replace="innerHTML">Create a new wordsearch</a>
-                    </p></div>
+                            hx-target="#word-form"
+                            hx-replace="innerHTML"
+                            class="button">Create a new wordsearch</a>
+                    </p>
+                </div>
             </main>
             <aside>
                 <h2>Wordsearches Created</h2>
-                <ul>
-                    <li>
-                        <a hx-get="/grids/123"
-                            hx-trigger="click">123
-                        </a>
-                    </li>
-                </ul>
+                <div
+                    hx-get="/api/v1/grids"
+                    hx-trigger="load"
+                    hx-target="#grids-list"
+                    hx-replace="outerHtml"
+                >
+                    <div id="grids-list"></div>
+                </div>
         </div>
     </body>
     </html>
